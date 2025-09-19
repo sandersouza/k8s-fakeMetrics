@@ -1,32 +1,8 @@
 {
   "__inputs": [
     {
-      "name": "DS_THANOS_- PAAS",
-      "label": "thanos - paas",
-      "description": "",
-      "type": "datasource",
-      "pluginId": "prometheus",
-      "pluginName": "Prometheus"
-    },
-    {
-      "name": "DS_THANOS_- AWS",
-      "label": "thanos - aws",
-      "description": "",
-      "type": "datasource",
-      "pluginId": "prometheus",
-      "pluginName": "Prometheus"
-    },
-    {
-      "name": "DS_ELASTICSEARCH_- INGRESS - PAAS",
-      "label": "elasticsearch - ingress - paas",
-      "description": "",
-      "type": "datasource",
-      "pluginId": "elasticsearch",
-      "pluginName": "Elasticsearch"
-    },
-    {
-      "name": "DS_THANOS_- AZURE",
-      "label": "thanos - azure",
+      "name": "Prometheus",
+      "label": "fakeMetrics",
       "description": "",
       "type": "datasource",
       "pluginId": "prometheus",
@@ -35,12 +11,6 @@
   ],
   "__elements": {},
   "__requires": [
-    {
-      "type": "datasource",
-      "id": "elasticsearch",
-      "name": "Elasticsearch",
-      "version": "1.0.0"
-    },
     {
       "type": "panel",
       "id": "gauge",
