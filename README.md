@@ -10,6 +10,8 @@ Gerador de métricas sintéticas de Kubernetes inspirado no projeto [Grafana fak
 - Métricas do control plane (apiserver, scheduler, controller-manager) incluindo histogramas de latência.
 - Métricas de ingress controllers (NGINX e opcionalmente Traefik) com contadores e histogramas.
 - Exportação via endpoint HTTP `/metrics` compatível com Prometheus.
+- Catálogo dinâmico de métricas carregado de `metric-label.json`, permitindo simular todas as séries usadas em dashboards reais.
+- Fator *chaos* configurado para gerar anomalias esporádicas de CPU, memória, tráfego de rede, disco e conexões.
 
 ## Requisitos
 
@@ -118,5 +120,7 @@ A combinação dessas métricas cobre dashboards de infraestrutura (CPU, memóri
 
 - Execute `python -m k8s_fake_metrics --once` para validar rapidamente a geração de métricas.
 - Para garantir que o código está sintaticamente correto utilize `python -m compileall k8s_fake_metrics`.
+- Ajuste o arquivo `metric-label.json` para incluir novas métricas no catálogo dinâmico ou remover séries específicas.
+- Utilize as variáveis de ambiente padrão em conjunto com o fator *chaos* embutido para observar como dashboards reagem a picos súbitos.
 
 Contribuições são bem-vindas!

@@ -65,8 +65,8 @@
       {
         "builtIn": 1,
         "datasource": {
-          "type": "datasource",
-          "uid": "grafana"
+          "type": "prometheus",
+          "uid": "${Prometheus}"
         },
         "enable": true,
         "hide": true,
@@ -94,7 +94,7 @@
       "collapsed": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "AxODBm_Gk"
+        "uid": "${Prometheus}"
       },
       "gridPos": {
         "h": 1,
@@ -104,13 +104,13 @@
       },
       "id": 26,
       "panels": [],
-      "title": "Sumário Projeto",
+      "title": "Sum\u00e1rio Projeto",
       "type": "row"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_THANOS_- PAAS}"
+        "uid": "${Prometheus}"
       },
       "fieldConfig": {
         "defaults": {
@@ -141,7 +141,7 @@
               }
             ]
           },
-          "unit": "decbytes"
+          "unit": "cores"
         },
         "overrides": []
       },
@@ -173,16 +173,16 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS_- AWS}"
+            "uid": "${Prometheus}"
           },
           "editorMode": "code",
-          "expr": "sum(kube_resourcequota{cluster=~\"$cluster\",namespace=~\"$namespace\",type=\"hard\"})",
+          "expr": "sum(kube_resourcequota{cluster=~\"$cluster\", namespace=~\"$namespace\", resource=\"cpu\"})",
           "format": "time_series",
           "hide": false,
-          "instant": false,
+          "instant": true,
           "interval": "",
           "intervalFactor": 2,
-          "legendFormat": "",
+          "legendFormat": "CPU hard quota",
           "refId": "A",
           "step": 20
         }
@@ -193,7 +193,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_THANOS_- PAAS}"
+        "uid": "${Prometheus}"
       },
       "fieldConfig": {
         "defaults": {
@@ -224,7 +224,7 @@
               }
             ]
           },
-          "unit": "decbytes"
+          "unit": "cores"
         },
         "overrides": []
       },
@@ -256,16 +256,16 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS_- AWS}"
+            "uid": "${Prometheus}"
           },
           "editorMode": "code",
-          "expr": "sum(kube_resourcequota{cluster=~\"$cluster\",namespace=~\"$namespace\",type=\"hard\"}) - sum(kube_resourcequota{cluster=~\"$cluster\",namespace=~\"$namespace$\",type=\"used\"})",
+          "expr": "sum(kube_resourcequota{cluster=~\"$cluster\", namespace=~\"$namespace\", resource=\"cpu\"}) - sum(kube_resourcequota_usage_cpu_cores{cluster=~\"$cluster\", namespace=~\"$namespace\"})",
           "format": "time_series",
           "hide": false,
-          "instant": false,
+          "instant": true,
           "interval": "",
           "intervalFactor": 2,
-          "legendFormat": "",
+          "legendFormat": "CPU dispon\u00edvel",
           "refId": "A",
           "step": 20
         }
@@ -276,7 +276,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_THANOS_- PAAS}"
+        "uid": "${Prometheus}"
       },
       "fieldConfig": {
         "defaults": {
@@ -339,25 +339,27 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS_- AWS}"
+            "uid": "${Prometheus}"
           },
           "editorMode": "code",
-          "expr": "sum(container_memory_rss{cluster=~\"$cluster\",namespace=~\"$namespace\",name=~\"k8s_.*\"})\r\nor \r\nsum(container_memory_rss{cluster=\"$cluster\",namespace=~\"$namespace\",name=~\".*\"}) \r\n",
+          "expr": "sum(container_memory_usage_bytes{cluster=~\"$cluster\", namespace=~\"$namespace\"})",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
           "range": true,
           "refId": "A",
-          "step": 20
+          "step": 20,
+          "instant": true,
+          "legendFormat": "Mem\u00f3ria em uso"
         }
       ],
-      "title": "Memória RSS Utilizada",
+      "title": "Mem\u00f3ria RSS Utilizada",
       "type": "stat"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_THANOS_- PAAS}"
+        "uid": "${Prometheus}"
       },
       "fieldConfig": {
         "defaults": {
@@ -423,13 +425,14 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS_- PAAS}"
+            "uid": "${Prometheus}"
           },
           "editorMode": "code",
-          "expr": "sum(kube_resourcequota{cluster=~\"$cluster\",exported_namespace=~\"$namespace$\",type=\"used\"}) * 100 / sum(kube_resourcequota{cluster=~\"$cluster\",exported_namespace=~\"$namespace$\",type=\"hard\"})\r\nor\r\nsum(kube_resourcequota{cluster=~\"$cluster\",namespace=~\"$namespace$\",type=\"used\"}) * 100 / sum(kube_resourcequota{cluster=~\"$cluster\",namespace=~\"$namespace$\",type=\"hard\"})",
-          "legendFormat": "__auto",
+          "expr": "sum(kube_resourcequota_usage_cpu_cores{cluster=~\"$cluster\", namespace=~\"$namespace\"}) / (sum(kube_resourcequota{cluster=~\"$cluster\", namespace=~\"$namespace\", resource=\"cpu\"})) * 100",
+          "legendFormat": "Uso de CPU (%)",
           "range": true,
-          "refId": "A"
+          "refId": "A",
+          "instant": true
         }
       ],
       "title": "Quota Usada",
@@ -438,7 +441,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_THANOS_- PAAS}"
+        "uid": "${Prometheus}"
       },
       "fieldConfig": {
         "defaults": {
@@ -469,7 +472,7 @@
               }
             ]
           },
-          "unit": "none"
+          "unit": "short"
         },
         "overrides": []
       },
@@ -501,27 +504,27 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS_- PAAS}"
+            "uid": "${Prometheus}"
           },
           "editorMode": "code",
-          "expr": "sum(kube_pod_container_status_running{cluster=~\"$cluster\",exported_namespace=~\"$namespace$\"})\nor\nsum(kube_pod_container_status_running{cluster=~\"$cluster\",namespace=~\"$namespace$\"})\nor\nsum(kube_running_pod_ready{cluster=~\"$cluster\",namespace=~\"$namespace$\"})",
+          "expr": "sum(kube_pod_status_phase{cluster=~\"$cluster\", namespace=~\"$namespace\", phase=\"Running\"})",
           "format": "time_series",
           "hide": false,
           "instant": true,
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "",
+          "legendFormat": "Pods em execu\u00e7\u00e3o",
           "refId": "A",
           "step": 10
         }
       ],
-      "title": "Pods Em Execução",
+      "title": "Pods Em Execu\u00e7\u00e3o",
       "type": "stat"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_THANOS_- PAAS}"
+        "uid": "${Prometheus}"
       },
       "fieldConfig": {
         "defaults": {
@@ -556,7 +559,7 @@
               }
             ]
           },
-          "unit": "none"
+          "unit": "short"
         },
         "overrides": []
       },
@@ -588,18 +591,19 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS_- PAAS}"
+            "uid": "${Prometheus}"
           },
           "editorMode": "code",
-          "expr": "sum(kube_pod_container_status_restarts{cluster=~\"$cluster\",namespace=~\"$namespace$\"})\nor\nsum(kube_pod_container_status_restarts{cluster=~\"$cluster\",namespace=~\"$namespace$\"})\nor\nsum(kube_pod_container_status_restarts_total{cluster=~\"$cluster\",namespace=~\"$namespace$\"})",
+          "expr": "sum(kube_pod_container_status_restarts_total{cluster=~\"$cluster\", namespace=~\"$namespace\"})",
           "format": "time_series",
           "hide": false,
           "interval": "",
           "intervalFactor": 2,
-          "legendFormat": "",
+          "legendFormat": "Total restarts",
           "range": true,
           "refId": "A",
-          "step": 20
+          "step": 20,
+          "instant": true
         }
       ],
       "title": "Quantidade de Restarts Pods",
@@ -608,7 +612,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_THANOS_- PAAS}"
+        "uid": "${Prometheus}"
       },
       "fieldConfig": {
         "defaults": {
@@ -661,7 +665,7 @@
               }
             ]
           },
-          "unit": "short"
+          "unit": "cores"
         },
         "overrides": []
       },
@@ -690,11 +694,11 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS_- PAAS}"
+            "uid": "${Prometheus}"
           },
           "editorMode": "code",
-          "expr": "sum (rate (container_cpu_usage_seconds_total{cluster=~\"$cluster\",namespace=~\"$namespace$\",container=\"\"}[5m])) ",
-          "legendFormat": "__auto",
+          "expr": "sum(rate(container_cpu_usage_seconds_total{cluster=~\"$cluster\", namespace=~\"$namespace\"}[5m]))",
+          "legendFormat": "CPU total",
           "range": true,
           "refId": "A"
         }
@@ -709,7 +713,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_THANOS_- PAAS}"
+        "uid": "${Prometheus}"
       },
       "fieldConfig": {
         "defaults": {
@@ -756,21 +760,22 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS_- AWS}"
+            "uid": "${Prometheus}"
           },
           "editorMode": "code",
-          "expr": "sum(container_memory_rss{cluster=~\"$cluster\",namespace=~\"$namespace\",name=~\"k8s_.*\"})\r\nor \r\nsum(container_memory_rss{cluster=\"$cluster\",namespace=~\"$namespace\",name=~\".*\"}) ",
+          "expr": "sum(container_memory_usage_bytes{cluster=~\"$cluster\", namespace=~\"$namespace\"})",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
           "range": true,
           "refId": "A",
-          "step": 20
+          "step": 20,
+          "legendFormat": "Mem\u00f3ria total"
         }
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "Memória Utilizada",
+      "title": "Mem\u00f3ria Utilizada",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -803,7 +808,7 @@
       "columns": [],
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_THANOS_- PAAS}"
+        "uid": "${Prometheus}"
       },
       "fontSize": "100%",
       "gridPos": {
@@ -843,7 +848,7 @@
       ],
       "targets": [
         {
-          "expr": "sum(kube_pod_status_phase{cluster=~\"$cluster\",exported_namespace=~\"$namespace$\"}) by (phase) > 0\nor\nsum(kube_pod_status_phase{cluster=~\"$cluster\",namespace=~\"$namespace$\"}) by (phase) > 0",
+          "expr": "sum(kube_pod_status_phase{cluster=~\"$cluster\", namespace=~\"$namespace\"}) by (phase)",
           "format": "time_series",
           "hide": false,
           "instant": true,
@@ -854,11 +859,11 @@
           "step": 1,
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS_- PAAS}"
+            "uid": "${Prometheus}"
           }
         },
         {
-          "expr": "sum(kube_pod_status_phase{cluster=~\"$cluster\",exported_namespace=~\"$namespace$\"}) > 0\nor\nsum(kube_pod_status_phase{cluster=~\"$cluster\",namespace=~\"$namespace$\"}) > 0",
+          "expr": "sum(kube_pod_status_phase{cluster=~\"$cluster\", namespace=~\"$namespace\"})",
           "format": "time_series",
           "hide": false,
           "instant": true,
@@ -869,7 +874,7 @@
           "step": 1,
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS_- PAAS}"
+            "uid": "${Prometheus}"
           }
         }
       ],
@@ -880,7 +885,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_THANOS_- PAAS}"
+        "uid": "${Prometheus}"
       },
       "fieldConfig": {
         "defaults": {
@@ -944,11 +949,11 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS_- PAAS}"
+            "uid": "${Prometheus}"
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "sum(container_oom_events_total{cluster=~\"$cluster\",namespace=~\"$namespace\",node=~\"$node\",pod=~\"$pod\",container=~\"$container\"} > 0)  by (cluster,namespace,node,pod,container)",
+          "expr": "sum by (cluster, namespace, pod, container, node) (\n  kube_pod_container_status_last_terminated_reason{cluster=~\"$cluster\", namespace=~\"$namespace\", pod=~\"$pod\", container=~\"$container\", reason=\"OOMKilled\"}\n  * on (cluster, namespace, pod) group_left(node)\n    kube_pod_info{cluster=~\"$cluster\", namespace=~\"$namespace\", node=~\"$node\", pod=~\"$pod\"}\n)",
           "format": "table",
           "hide": false,
           "instant": true,
@@ -978,7 +983,7 @@
               "pod": 4
             },
             "renameByName": {
-              "Value": "Qtd de Restarts"
+              "Value": "Qtd de OOM"
             }
           }
         }
@@ -988,7 +993,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_THANOS_- PAAS}"
+        "uid": "${Prometheus}"
       },
       "fieldConfig": {
         "defaults": {
@@ -1066,10 +1071,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS_- PAAS}"
+            "uid": "${Prometheus}"
           },
           "editorMode": "code",
-          "expr": "sum(kube_pod_status_phase{cluster=~\"$cluster\",exported_namespace=~\"$namespace$\"}) by (phase) > 0\nor\nsum(kube_pod_status_phase{cluster=~\"$cluster\",namespace=~\"$namespace$\"}) by (phase) > 0",
+          "expr": "sum(kube_pod_status_phase{cluster=~\"$cluster\", namespace=~\"$namespace\"}) by (phase)",
           "format": "time_series",
           "hide": false,
           "instant": false,
@@ -1083,10 +1088,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS_- PAAS}"
+            "uid": "${Prometheus}"
           },
           "editorMode": "code",
-          "expr": "sum(kube_pod_status_phase{cluster=~\"$cluster\",exported_namespace=~\"$namespace$\"}) > 0\nor\nsum(kube_pod_status_phase{cluster=~\"$cluster\",namespace=~\"$namespace$\"}) > 0",
+          "expr": "sum(kube_pod_status_phase{cluster=~\"$cluster\", namespace=~\"$namespace\"})",
           "format": "time_series",
           "hide": false,
           "instant": false,
@@ -1104,7 +1109,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_THANOS_- PAAS}"
+        "uid": "${Prometheus}"
       },
       "fieldConfig": {
         "defaults": {
@@ -1179,10 +1184,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS_- AWS}"
+            "uid": "${Prometheus}"
           },
           "editorMode": "code",
-          "expr": "sum(kube_pod_status_phase{cluster=~\"$cluster\",exported_namespace=~\"$namespace$\", phase!=\"Running\"}) by (pod,phase) > 0\nor\nsum(kube_pod_status_phase{cluster=~\"$cluster\",namespace=~\"$namespace$\", phase!=\"Running\"}) by (pod,phase) > 0",
+          "expr": "sum(kube_pod_status_phase{cluster=~\"$cluster\", namespace=~\"$namespace\", phase!=\"Running\"}) by (pod, phase) > 0",
           "format": "table",
           "hide": false,
           "instant": true,
@@ -1208,7 +1213,7 @@
       "collapsed": true,
       "datasource": {
         "type": "prometheus",
-        "uid": "AxODBm_Gk"
+        "uid": "${Prometheus}"
       },
       "gridPos": {
         "h": 1,
@@ -1220,8 +1225,8 @@
       "panels": [
         {
           "datasource": {
-            "type": "elasticsearch",
-            "uid": "${DS_ELASTICSEARCH_- INGRESS - PAAS}"
+            "type": "prometheus",
+            "uid": "${Prometheus}"
           },
           "fieldConfig": {
             "defaults": {
@@ -1252,7 +1257,7 @@
                   }
                 ]
               },
-              "unit": "none"
+              "unit": "reqps"
             },
             "overrides": []
           },
@@ -1273,7 +1278,7 @@
             "orientation": "horizontal",
             "reduceOptions": {
               "calcs": [
-                "mean"
+                "lastNotNull"
               ],
               "fields": "",
               "values": false
@@ -1283,54 +1288,23 @@
           "pluginVersion": "9.4.7",
           "targets": [
             {
-              "bucketAggs": [
-                {
-                  "field": "@timestamp",
-                  "id": "2",
-                  "settings": {
-                    "interval": "30s",
-                    "min_doc_count": 0,
-                    "trimEdges": 0
-                  },
-                  "type": "date_histogram"
-                }
-              ],
-              "datasource": {
-                "type": "elasticsearch",
-                "uid": "${DS_ELASTICSEARCH_- INGRESS - PAAS}"
-              },
-              "dsType": "elasticsearch",
-              "expr": "sum((sum_over_time(haproxy_server_connections_total{namespace=~\"$namespace$\"}[5m])))",
-              "format": "table",
-              "hide": false,
-              "instant": true,
-              "interval": "",
-              "intervalFactor": 1,
-              "metrics": [
-                {
-                  "field": "c_ip",
-                  "id": "1",
-                  "inlineScript": "namespace",
-                  "meta": {},
-                  "settings": {},
-                  "type": "count"
-                }
-              ],
-              "query": "namespace.keyword: \"$namespace\"",
+              "expr": "sum(rate(apiserver_request_total{cluster=~\"$cluster\"}[5m]))",
+              "legendFormat": "",
               "refId": "A",
-              "step": 2,
-              "timeField": "@timestamp"
+              "instant": true,
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${Prometheus}"
+              }
             }
           ],
-          "timeFrom": "10m",
-          "timeShift": "1m",
-          "title": "Requisições",
+          "title": "Requests por segundo",
           "type": "stat"
         },
         {
           "datasource": {
-            "type": "elasticsearch",
-            "uid": "${DS_ELASTICSEARCH_- INGRESS - PAAS}"
+            "type": "prometheus",
+            "uid": "${Prometheus}"
           },
           "fieldConfig": {
             "defaults": {
@@ -1360,7 +1334,7 @@
                   }
                 ]
               },
-              "unit": "none"
+              "unit": "reqps"
             },
             "overrides": []
           },
@@ -1381,7 +1355,7 @@
             "orientation": "horizontal",
             "reduceOptions": {
               "calcs": [
-                "mean"
+                "lastNotNull"
               ],
               "fields": "",
               "values": false
@@ -1391,50 +1365,23 @@
           "pluginVersion": "9.4.7",
           "targets": [
             {
-              "bucketAggs": [
-                {
-                  "field": "@timestamp",
-                  "id": "2",
-                  "settings": {
-                    "interval": "30s",
-                    "min_doc_count": 0,
-                    "trimEdges": 0
-                  },
-                  "type": "date_histogram"
-                }
-              ],
-              "datasource": {
-                "type": "elasticsearch",
-                "uid": "${DS_ELASTICSEARCH_- INGRESS - PAAS}"
-              },
-              "dsType": "elasticsearch",
-              "expr": "namespace:$namespace$ AND namespace:$namespace$",
-              "format": "table",
-              "hide": false,
-              "instant": true,
-              "intervalFactor": 1,
-              "metrics": [
-                {
-                  "field": "select field",
-                  "id": "1",
-                  "type": "count"
-                }
-              ],
-              "query": "namespace.keyword: \"$namespace\" AND status_code: [200 TO 299]",
+              "expr": "sum(rate(apiserver_request_total{cluster=~\"$cluster\", code=~\"2..\"}[5m]))",
+              "legendFormat": "",
               "refId": "A",
-              "step": 2,
-              "timeField": "@timestamp"
+              "instant": true,
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${Prometheus}"
+              }
             }
           ],
-          "timeFrom": "10m",
-          "timeShift": "1m",
-          "title": "Request 2xx",
+          "title": "Requests 2xx",
           "type": "stat"
         },
         {
           "datasource": {
-            "type": "elasticsearch",
-            "uid": "${DS_ELASTICSEARCH_- INGRESS - PAAS}"
+            "type": "prometheus",
+            "uid": "${Prometheus}"
           },
           "fieldConfig": {
             "defaults": {
@@ -1464,7 +1411,7 @@
                   }
                 ]
               },
-              "unit": "none"
+              "unit": "reqps"
             },
             "overrides": []
           },
@@ -1485,7 +1432,7 @@
             "orientation": "horizontal",
             "reduceOptions": {
               "calcs": [
-                "mean"
+                "lastNotNull"
               ],
               "fields": "",
               "values": false
@@ -1495,50 +1442,23 @@
           "pluginVersion": "9.4.7",
           "targets": [
             {
-              "bucketAggs": [
-                {
-                  "field": "@timestamp",
-                  "id": "2",
-                  "settings": {
-                    "interval": "30s",
-                    "min_doc_count": 0,
-                    "trimEdges": 0
-                  },
-                  "type": "date_histogram"
-                }
-              ],
-              "datasource": {
-                "type": "elasticsearch",
-                "uid": "${DS_ELASTICSEARCH_- INGRESS - PAAS}"
-              },
-              "dsType": "elasticsearch",
-              "expr": "sum(sum_over_time(haproxy_server_http_responses_total{namespace=~\"$namespace$\",code!=\"2xx\"}[5m]))",
-              "format": "table",
-              "hide": false,
-              "instant": true,
-              "intervalFactor": 1,
-              "metrics": [
-                {
-                  "field": "select field",
-                  "id": "1",
-                  "type": "count"
-                }
-              ],
-              "query": "namespace.keyword: \"$namespace\" AND status_code: [500 TO 599]",
+              "expr": "sum(rate(apiserver_request_total{cluster=~\"$cluster\", code=~\"5..\"}[5m]))",
+              "legendFormat": "",
               "refId": "A",
-              "step": 2,
-              "timeField": "@timestamp"
+              "instant": true,
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${Prometheus}"
+              }
             }
           ],
-          "timeFrom": "10m",
-          "timeShift": "1m",
-          "title": "Request 5xx",
+          "title": "Requests 5xx",
           "type": "stat"
         },
         {
           "datasource": {
-            "type": "elasticsearch",
-            "uid": "${DS_ELASTICSEARCH_- INGRESS - PAAS}"
+            "type": "prometheus",
+            "uid": "${Prometheus}"
           },
           "fieldConfig": {
             "defaults": {
@@ -1568,7 +1488,7 @@
                   }
                 ]
               },
-              "unit": "none"
+              "unit": "reqps"
             },
             "overrides": []
           },
@@ -1589,7 +1509,7 @@
             "orientation": "horizontal",
             "reduceOptions": {
               "calcs": [
-                "mean"
+                "lastNotNull"
               ],
               "fields": "",
               "values": false
@@ -1599,50 +1519,23 @@
           "pluginVersion": "9.4.7",
           "targets": [
             {
-              "bucketAggs": [
-                {
-                  "field": "@timestamp",
-                  "id": "2",
-                  "settings": {
-                    "interval": "30s",
-                    "min_doc_count": 0,
-                    "trimEdges": 0
-                  },
-                  "type": "date_histogram"
-                }
-              ],
-              "datasource": {
-                "type": "elasticsearch",
-                "uid": "${DS_ELASTICSEARCH_- INGRESS - PAAS}"
-              },
-              "dsType": "elasticsearch",
-              "expr": "sum(sum_over_time(haproxy_server_http_responses_total{namespace=~\"$namespace$\",code!=\"2xx\"}[5m]))",
-              "format": "table",
-              "hide": false,
-              "instant": true,
-              "intervalFactor": 1,
-              "metrics": [
-                {
-                  "field": "select field",
-                  "id": "1",
-                  "type": "count"
-                }
-              ],
-              "query": "namespace.keyword: \"$namespace\" AND status_code: [400 TO 499]",
+              "expr": "sum(rate(apiserver_request_total{cluster=~\"$cluster\", code=~\"4..\"}[5m]))",
+              "legendFormat": "",
               "refId": "A",
-              "step": 2,
-              "timeField": "@timestamp"
+              "instant": true,
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${Prometheus}"
+              }
             }
           ],
-          "timeFrom": "10m",
-          "timeShift": "1m",
-          "title": "Request 4xx",
+          "title": "Requests 4xx",
           "type": "stat"
         },
         {
           "datasource": {
-            "type": "elasticsearch",
-            "uid": "${DS_ELASTICSEARCH_- INGRESS - PAAS}"
+            "type": "prometheus",
+            "uid": "${Prometheus}"
           },
           "fieldConfig": {
             "defaults": {
@@ -1693,7 +1586,7 @@
                   }
                 ]
               },
-              "unit": "short"
+              "unit": "reqps"
             },
             "overrides": [
               {
@@ -1818,139 +1711,55 @@
           "pluginVersion": "9.4.7",
           "targets": [
             {
-              "alias": "Status Code 2xx",
-              "bucketAggs": [
-                {
-                  "field": "@timestamp",
-                  "id": "2",
-                  "settings": {
-                    "interval": "auto",
-                    "min_doc_count": 0,
-                    "trimEdges": 0
-                  },
-                  "type": "date_histogram"
-                }
-              ],
-              "dsType": "elasticsearch",
-              "metrics": [
-                {
-                  "field": "select field",
-                  "id": "1",
-                  "meta": {},
-                  "settings": {},
-                  "type": "count"
-                }
-              ],
-              "query": "namespace.keyword: \"$namespace\" AND status_code : [200 TO 299]",
+              "expr": "sum(rate(apiserver_request_total{cluster=~\"$cluster\", code=~\"2..\"}[5m]))",
+              "legendFormat": "Status Code 2xx",
               "refId": "A",
-              "timeField": "@timestamp",
+              "range": true,
               "datasource": {
-                "type": "elasticsearch",
-                "uid": "${DS_ELASTICSEARCH_- INGRESS - PAAS}"
+                "type": "prometheus",
+                "uid": "${Prometheus}"
               }
             },
             {
-              "alias": "Status Code 3xx",
-              "bucketAggs": [
-                {
-                  "field": "@timestamp",
-                  "id": "2",
-                  "settings": {
-                    "interval": "auto",
-                    "min_doc_count": 0,
-                    "trimEdges": 0
-                  },
-                  "type": "date_histogram"
-                }
-              ],
-              "dsType": "elasticsearch",
-              "metrics": [
-                {
-                  "field": "select field",
-                  "id": "1",
-                  "type": "count"
-                }
-              ],
-              "query": "namespace.keyword:\"$namespace\" AND status_code : [300 TO 399]",
+              "expr": "sum(rate(apiserver_request_total{cluster=~\"$cluster\", code=~\"3..\"}[5m]))",
+              "legendFormat": "Status Code 3xx",
               "refId": "B",
-              "timeField": "@timestamp",
+              "range": true,
               "datasource": {
-                "type": "elasticsearch",
-                "uid": "${DS_ELASTICSEARCH_- INGRESS - PAAS}"
+                "type": "prometheus",
+                "uid": "${Prometheus}"
               }
             },
             {
-              "alias": "Status Code 4xx",
-              "bucketAggs": [
-                {
-                  "field": "@timestamp",
-                  "id": "2",
-                  "settings": {
-                    "interval": "auto",
-                    "min_doc_count": 0,
-                    "trimEdges": 0
-                  },
-                  "type": "date_histogram"
-                }
-              ],
-              "dsType": "elasticsearch",
-              "metrics": [
-                {
-                  "field": "select field",
-                  "id": "1",
-                  "type": "count"
-                }
-              ],
-              "query": "namespace.keyword:\"$namespace\" AND status_code : [400 TO 499]",
+              "expr": "sum(rate(apiserver_request_total{cluster=~\"$cluster\", code=~\"4..\"}[5m]))",
+              "legendFormat": "Status Code 4xx",
               "refId": "C",
-              "timeField": "@timestamp",
+              "range": true,
               "datasource": {
-                "type": "elasticsearch",
-                "uid": "${DS_ELASTICSEARCH_- INGRESS - PAAS}"
+                "type": "prometheus",
+                "uid": "${Prometheus}"
               }
             },
             {
-              "alias": "Status Code 5xx",
-              "bucketAggs": [
-                {
-                  "field": "@timestamp",
-                  "id": "2",
-                  "settings": {
-                    "interval": "auto",
-                    "min_doc_count": 0,
-                    "trimEdges": 0
-                  },
-                  "type": "date_histogram"
-                }
-              ],
-              "dsType": "elasticsearch",
-              "metrics": [
-                {
-                  "field": "select field",
-                  "id": "1",
-                  "meta": {},
-                  "settings": {},
-                  "type": "count"
-                }
-              ],
-              "query": "namespace.keyword:\"$namespace\" AND status_code : [500 TO 599]",
+              "expr": "sum(rate(apiserver_request_total{cluster=~\"$cluster\", code=~\"5..\"}[5m]))",
+              "legendFormat": "Status Code 5xx",
               "refId": "D",
-              "timeField": "@timestamp",
+              "range": true,
               "datasource": {
-                "type": "elasticsearch",
-                "uid": "${DS_ELASTICSEARCH_- INGRESS - PAAS}"
+                "type": "prometheus",
+                "uid": "${Prometheus}"
               }
             }
           ],
           "timeShift": "1m",
-          "title": "Requisições",
+          "title": "Requisi\u00e7\u00f5es",
           "type": "timeseries"
         },
         {
           "columns": [],
           "datasource": {
-            "type": "elasticsearch",
-            "uid": "${DS_ELASTICSEARCH_- INGRESS - PAAS}"
+            "type": "prometheus",
+            "uid": "${Prometheus}"
           },
           "fontSize": "100%",
           "gridPos": {
@@ -1974,83 +1783,45 @@
               "align": "auto",
               "dateFormat": "YYYY-MM-DD HH:mm:ss",
               "pattern": "Time",
-              "type": "date"
+              "type": "hidden"
             },
             {
-              "alias": "",
+              "alias": "C\u00f3digo",
               "align": "auto",
-              "colors": [
-                "rgba(245, 54, 54, 0.9)",
-                "rgba(237, 129, 40, 0.89)",
-                "rgba(50, 172, 45, 0.97)"
-              ],
-              "dateFormat": "YYYY-MM-DD HH:mm:ss",
-              "decimals": 0,
-              "mappingType": 1,
-              "pattern": "status_code",
-              "thresholds": [],
-              "type": "number",
-              "unit": "short"
+              "pattern": "code",
+              "type": "string"
             },
             {
-              "alias": "",
+              "alias": "Verbo",
               "align": "auto",
-              "colors": [
-                "rgba(245, 54, 54, 0.9)",
-                "rgba(237, 129, 40, 0.89)",
-                "rgba(50, 172, 45, 0.97)"
-              ],
-              "decimals": 0,
-              "pattern": "/.*/",
-              "thresholds": [],
+              "pattern": "verb",
+              "type": "string"
+            },
+            {
+              "alias": "Recurso",
+              "align": "auto",
+              "pattern": "resource",
+              "type": "string"
+            },
+            {
+              "alias": "Req/s",
+              "align": "auto",
+              "decimals": 2,
+              "pattern": "Value",
               "type": "number",
-              "unit": "short"
+              "unit": "reqps"
             }
           ],
           "targets": [
             {
-              "alias": "Router Name",
-              "bucketAggs": [
-                {
-                  "fake": true,
-                  "field": "router.keyword",
-                  "id": "4",
-                  "settings": {
-                    "min_doc_count": 1,
-                    "order": "desc",
-                    "orderBy": "_term",
-                    "size": "0"
-                  },
-                  "type": "terms"
-                },
-                {
-                  "fake": true,
-                  "field": "status_code",
-                  "id": "3",
-                  "settings": {
-                    "min_doc_count": 1,
-                    "order": "desc",
-                    "orderBy": "_term",
-                    "size": "0"
-                  },
-                  "type": "terms"
-                }
-              ],
-              "dsType": "elasticsearch",
-              "hide": false,
-              "metrics": [
-                {
-                  "field": "select field",
-                  "id": "1",
-                  "type": "count"
-                }
-              ],
-              "query": "namespace.keyword: \"$namespace\" AND status_code : [500 TO 599]",
+              "expr": "topk(10, sum(rate(apiserver_request_total{cluster=~\"$cluster\", code=~\"4..|5..\"}[5m])) by (code, verb, resource))",
+              "format": "table",
+              "instant": true,
+              "legendFormat": "",
               "refId": "A",
-              "timeField": "syslog_time",
               "datasource": {
-                "type": "elasticsearch",
-                "uid": "${DS_ELASTICSEARCH_- INGRESS - PAAS}"
+                "type": "prometheus",
+                "uid": "${Prometheus}"
               }
             }
           ],
@@ -2064,8 +1835,8 @@
           "dashLength": 10,
           "dashes": false,
           "datasource": {
-            "type": "elasticsearch",
-            "uid": "${DS_ELASTICSEARCH_- INGRESS - PAAS}"
+            "type": "prometheus",
+            "uid": "${Prometheus}"
           },
           "fieldConfig": {
             "defaults": {
@@ -2116,53 +1887,19 @@
           "steppedLine": false,
           "targets": [
             {
-              "bucketAggs": [
-                {
-                  "fake": true,
-                  "field": "pod.keyword",
-                  "id": "3",
-                  "settings": {
-                    "min_doc_count": 1,
-                    "order": "desc",
-                    "orderBy": "_term",
-                    "size": "0"
-                  },
-                  "type": "terms"
-                },
-                {
-                  "field": "@timestamp",
-                  "id": "2",
-                  "settings": {
-                    "interval": "auto",
-                    "min_doc_count": 0,
-                    "trimEdges": 0
-                  },
-                  "type": "date_histogram"
-                }
-              ],
-              "dsType": "elasticsearch",
-              "hide": false,
-              "metrics": [
-                {
-                  "field": "tt",
-                  "id": "1",
-                  "meta": {},
-                  "settings": {},
-                  "type": "avg"
-                }
-              ],
-              "query": "namespace.keyword : \"$namespace\"",
+              "expr": "histogram_quantile(0.95, sum(rate(apiserver_request_duration_seconds_bucket{cluster=~\"$cluster\"}[5m])) by (le, verb)) * 1000",
+              "legendFormat": "{{verb}}",
               "refId": "A",
-              "timeField": "@timestamp",
+              "range": true,
               "datasource": {
-                "type": "elasticsearch",
-                "uid": "${DS_ELASTICSEARCH_- INGRESS - PAAS}"
+                "type": "prometheus",
+                "uid": "${Prometheus}"
               }
             }
           ],
           "thresholds": [],
           "timeRegions": [],
-          "title": "Média Tempo Resposta - POD",
+          "title": "M\u00e9dia Tempo Resposta - POD",
           "tooltip": {
             "shared": true,
             "sort": 2,
@@ -2178,7 +1915,7 @@
             {
               "$$hashKey": "object:206",
               "format": "ms",
-              "label": "",
+              "label": "ms",
               "logBase": 1,
               "show": true
             },
@@ -2200,8 +1937,8 @@
           "dashLength": 10,
           "dashes": false,
           "datasource": {
-            "type": "elasticsearch",
-            "uid": "${DS_ELASTICSEARCH_- INGRESS - PAAS}"
+            "type": "prometheus",
+            "uid": "${Prometheus}"
           },
           "fieldConfig": {
             "defaults": {
@@ -2252,53 +1989,19 @@
           "steppedLine": false,
           "targets": [
             {
-              "bucketAggs": [
-                {
-                  "fake": true,
-                  "field": "service.keyword",
-                  "id": "3",
-                  "settings": {
-                    "min_doc_count": 1,
-                    "order": "desc",
-                    "orderBy": "_term",
-                    "size": "0"
-                  },
-                  "type": "terms"
-                },
-                {
-                  "field": "@timestamp",
-                  "id": "2",
-                  "settings": {
-                    "interval": "auto",
-                    "min_doc_count": 0,
-                    "trimEdges": 0
-                  },
-                  "type": "date_histogram"
-                }
-              ],
-              "dsType": "elasticsearch",
-              "hide": false,
-              "metrics": [
-                {
-                  "field": "tt",
-                  "id": "1",
-                  "meta": {},
-                  "settings": {},
-                  "type": "avg"
-                }
-              ],
-              "query": "namespace.keyword: \"$namespace\"",
+              "expr": "histogram_quantile(0.50, sum(rate(apiserver_request_duration_seconds_bucket{cluster=~\"$cluster\"}[5m])) by (le, resource)) * 1000",
+              "legendFormat": "{{resource}}",
               "refId": "A",
-              "timeField": "@timestamp",
+              "range": true,
               "datasource": {
-                "type": "elasticsearch",
-                "uid": "${DS_ELASTICSEARCH_- INGRESS - PAAS}"
+                "type": "prometheus",
+                "uid": "${Prometheus}"
               }
             }
           ],
           "thresholds": [],
           "timeRegions": [],
-          "title": "Média Tempo Resposta - Aplicação",
+          "title": "M\u00e9dia Tempo Resposta - Aplica\u00e7\u00e3o",
           "tooltip": {
             "shared": true,
             "sort": 2,
@@ -2315,7 +2018,8 @@
               "$$hashKey": "object:300",
               "format": "ms",
               "logBase": 1,
-              "show": true
+              "show": true,
+              "label": "ms"
             },
             {
               "$$hashKey": "object:301",
@@ -2330,14 +2034,14 @@
           }
         }
       ],
-      "title": "Requisições HTTP",
+      "title": "Requisi\u00e7\u00f5es HTTP",
       "type": "row"
     },
     {
       "collapsed": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "AxODBm_Gk"
+        "uid": "${Prometheus}"
       },
       "gridPos": {
         "h": 1,
@@ -2357,7 +2061,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_THANOS_- PAAS}"
+        "uid": "${Prometheus}"
       },
       "fieldConfig": {
         "defaults": {
@@ -2409,10 +2113,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS_- AZURE}"
+            "uid": "${Prometheus}"
           },
           "editorMode": "code",
-          "expr": "sum (container_memory_rss{cluster=~\"$cluster\",namespace=\"$namespace\",image!=\"\",pod=~\"$pod\"}) by (namespace,pod,cluster)",
+          "expr": "sum(container_memory_usage_bytes{cluster=~\"$cluster\", namespace=~\"$namespace\", pod=~\"$pod\"}) by (namespace, pod, cluster)",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -2425,7 +2129,7 @@
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "Utilização de Memória por Pod",
+      "title": "Utiliza\u00e7\u00e3o de Mem\u00f3ria por Pod",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -2460,7 +2164,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_THANOS_- PAAS}"
+        "uid": "${Prometheus}"
       },
       "fieldConfig": {
         "defaults": {
@@ -2511,15 +2215,15 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS_- AZURE}"
+            "uid": "${Prometheus}"
           },
           "editorMode": "code",
-          "expr": "sum(rate(container_cpu_usage_seconds_total{cluster=~\"$cluster\",namespace=\"$namespace\",container=\"\",pod=~\"$pod\"}[5m])) by (pod,cluster)",
+          "expr": "sum(rate(container_cpu_usage_seconds_total{cluster=~\"$cluster\", namespace=~\"$namespace\", pod=~\"$pod\"}[5m])) by (pod, cluster)",
           "format": "time_series",
           "hide": false,
           "interval": "",
           "intervalFactor": 2,
-          "legendFormat": "{{ pod }} [{{cluster}}]",
+          "legendFormat": "{{pod}} [{{cluster}}]",
           "range": true,
           "refId": "A",
           "step": 2
@@ -2527,7 +2231,7 @@
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "Utilização de CPU por Pod",
+      "title": "Utiliza\u00e7\u00e3o de CPU por Pod",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -2541,8 +2245,8 @@
       },
       "yaxes": [
         {
-          "format": "short",
-          "label": "Milicores",
+          "format": "cores",
+          "label": "Cores",
           "logBase": 1,
           "show": true
         },
@@ -2560,7 +2264,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_THANOS_- PAAS}"
+        "uid": "${Prometheus}"
       },
       "fieldConfig": {
         "defaults": {
@@ -2677,7 +2381,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "Utilização Atual"
+                "value": "Utiliza\u00e7\u00e3o Atual"
               },
               {
                 "id": "unit",
@@ -2770,7 +2474,7 @@
         "sortBy": [
           {
             "desc": true,
-            "displayName": "Utilização Atual"
+            "displayName": "Utiliza\u00e7\u00e3o Atual"
           }
         ]
       },
@@ -2779,11 +2483,11 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS_- AZURE}"
+            "uid": "${Prometheus}"
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "sum (container_memory_rss{cluster=~\"$cluster\",namespace=\"$namespace\",image!=\"\",pod=~\"$pod\"}) by (pod,cluster)",
+          "expr": "sum(container_memory_usage_bytes{cluster=~\"$cluster\", namespace=~\"$namespace\", pod=~\"$pod\"}) by (pod, cluster)",
           "format": "table",
           "hide": false,
           "instant": true,
@@ -2796,11 +2500,11 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS_- AZURE}"
+            "uid": "${Prometheus}"
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "sum(kube_pod_container_resource_limits{cluster=~\"$cluster\",namespace=\"$namespace\",container!=\"deployment\",resource=\"memory\",pod=~\"$pod\"}) by (pod,cluster)",
+          "expr": "sum(kube_pod_container_resource_limits{cluster=~\"$cluster\", namespace=~\"$namespace\", resource=\"memory\", unit=\"byte\", pod=~\"$pod\"}) by (pod, cluster)",
           "format": "table",
           "hide": false,
           "instant": true,
@@ -2813,11 +2517,11 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS_- AZURE}"
+            "uid": "${Prometheus}"
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "sum(container_memory_rss{cluster=~\"$cluster\",namespace=\"$namespace\",image!=\"\",pod=~\"$pod\"}) by (pod,cluster) / on (pod,cluster) sum(kube_pod_container_resource_limits{cluster=~\"$cluster\",namespace=\"$namespace\",container!=\"deployment\",resource=\"memory\",pod=~\"$pod\"}) by (pod,cluster) *100",
+          "expr": "sum(container_memory_usage_bytes{cluster=~\"$cluster\", namespace=~\"$namespace\", pod=~\"$pod\"}) by (pod, cluster) / on (pod, cluster) sum(kube_pod_container_resource_limits{cluster=~\"$cluster\", namespace=~\"$namespace\", resource=\"memory\", unit=\"byte\", pod=~\"$pod\"}) by (pod, cluster) * 100",
           "format": "table",
           "hide": false,
           "instant": true,
@@ -2828,7 +2532,7 @@
           "step": 1
         }
       ],
-      "title": "Consumo de Memória por Pod",
+      "title": "Consumo de Mem\u00f3ria por Pod",
       "transformations": [
         {
           "id": "merge",
@@ -2854,7 +2558,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_THANOS_- PAAS}"
+        "uid": "${Prometheus}"
       },
       "fieldConfig": {
         "defaults": {
@@ -2978,7 +2682,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "Utilização Atual"
+                "value": "Utiliza\u00e7\u00e3o Atual"
               },
               {
                 "id": "unit",
@@ -3061,10 +2765,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS_- AZURE}"
+            "uid": "${Prometheus}"
           },
           "editorMode": "code",
-          "expr": "label_replace(sum(rate(container_cpu_usage_seconds_total{cluster=~\"$cluster\",namespace=\"$namespace\",container=\"\",pod=~\"$pod\"}[5m])) by (pod,cluster), \"pods\", \"$1\", \"pod\", \"(.*)\")",
+          "expr": "label_replace(sum(rate(container_cpu_usage_seconds_total{cluster=~\"$cluster\", namespace=~\"$namespace\", pod=~\"$pod\"}[5m])) by (pod, cluster), \"pods\", \"$1\", \"pod\", \"(.*)\")",
           "format": "table",
           "hide": false,
           "instant": true,
@@ -3077,10 +2781,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS_- AZURE}"
+            "uid": "${Prometheus}"
           },
           "editorMode": "code",
-          "expr": "sum(kube_pod_container_resource_limits{cluster=~\"$cluster\",namespace=\"$namespace\",container!=\"deployment\",resource=\"cpu\",pod=~\"$pod\"}) by (pod,cluster)",
+          "expr": "sum(kube_pod_container_resource_limits{cluster=~\"$cluster\", namespace=~\"$namespace\", resource=\"cpu\", unit=\"core\", pod=~\"$pod\"}) by (pod, cluster)",
           "format": "table",
           "hide": false,
           "instant": true,
@@ -3093,10 +2797,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS_- AZURE}"
+            "uid": "${Prometheus}"
           },
           "editorMode": "code",
-          "expr": "sum(rate(container_cpu_usage_seconds_total{cluster=~\"$cluster\",namespace=\"$namespace\",container=\"\",pod=~\"$pod\"}[5m])) by (pod,cluster)\n / on (pod,cluster)\n\nsum(kube_pod_container_resource_limits{cluster=~\"$cluster\",namespace=\"$namespace\",container!=\"deployment\",resource=\"cpu\",pod=~\"$pod\"}) by (pod,cluster) *100",
+          "expr": "sum(rate(container_cpu_usage_seconds_total{cluster=~\"$cluster\", namespace=~\"$namespace\", pod=~\"$pod\"}[5m])) by (pod, cluster) / on (pod, cluster) sum(kube_pod_container_resource_limits{cluster=~\"$cluster\", namespace=~\"$namespace\", resource=\"cpu\", unit=\"core\", pod=~\"$pod\"}) by (pod, cluster) * 100",
           "format": "table",
           "hide": false,
           "instant": true,
@@ -3133,7 +2837,7 @@
       "collapsed": true,
       "datasource": {
         "type": "prometheus",
-        "uid": "AxODBm_Gk"
+        "uid": "${Prometheus}"
       },
       "gridPos": {
         "h": 1,
@@ -3150,7 +2854,7 @@
           "dashes": false,
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS_- PAAS}"
+            "uid": "${Prometheus}"
           },
           "fieldConfig": {
             "defaults": {
@@ -3199,18 +2903,19 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum (rate (container_network_transmit_bytes_total{cluster=~\"$cluster\",namespace=\"$namespace\"}[5m])) by (pod)",
+              "expr": "sum(rate(container_network_transmit_bytes_total{cluster=~\"$cluster\", namespace=~\"$namespace\", pod=~\"$pod\"}[5m])) by (pod)",
               "format": "time_series",
               "hide": false,
               "interval": "",
               "intervalFactor": 2,
-              "legendFormat": "{{ pod }}",
+              "legendFormat": "{{pod}}",
               "refId": "A",
               "step": 2,
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_THANOS_- PAAS}"
-              }
+                "uid": "${Prometheus}"
+              },
+              "range": true
             }
           ],
           "thresholds": [],
@@ -3230,8 +2935,8 @@
           "yaxes": [
             {
               "$$hashKey": "object:1060",
-              "format": "decbytes",
-              "label": "Milicores",
+              "format": "Bps",
+              "label": "Bytes/s",
               "logBase": 1,
               "show": true
             },
@@ -3254,7 +2959,7 @@
           "dashes": false,
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS_- PAAS}"
+            "uid": "${Prometheus}"
           },
           "fieldConfig": {
             "defaults": {
@@ -3303,18 +3008,19 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum (rate (container_network_receive_bytes_total{cluster=~\"$cluster\",namespace=\"$namespace\"}[5m])) by (pod)",
+              "expr": "sum(rate(container_network_receive_bytes_total{cluster=~\"$cluster\", namespace=~\"$namespace\", pod=~\"$pod\"}[5m])) by (pod)",
               "format": "time_series",
               "hide": false,
               "interval": "",
               "intervalFactor": 2,
-              "legendFormat": "{{ pod }}",
+              "legendFormat": "{{pod}}",
               "refId": "A",
               "step": 2,
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_THANOS_- PAAS}"
-              }
+                "uid": "${Prometheus}"
+              },
+              "range": true
             }
           ],
           "thresholds": [],
@@ -3334,8 +3040,8 @@
           "yaxes": [
             {
               "$$hashKey": "object:986",
-              "format": "decbytes",
-              "label": "Milicores",
+              "format": "Bps",
+              "label": "Bytes/s",
               "logBase": 1,
               "show": true
             },
@@ -3359,7 +3065,7 @@
       "collapsed": true,
       "datasource": {
         "type": "prometheus",
-        "uid": "AxODBm_Gk"
+        "uid": "${Prometheus}"
       },
       "gridPos": {
         "h": 1,
@@ -3373,7 +3079,7 @@
           "columns": [],
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS_- PAAS}"
+            "uid": "${Prometheus}"
           },
           "fontSize": "100%",
           "gridPos": {
@@ -3419,7 +3125,7 @@
           ],
           "targets": [
             {
-              "expr": "sum(kube_pod_container_info{cluster=~\"$cluster\",exported_namespace=~\"$namespace$\"}) by (container,image,exported_pod)\nor\nsum(kube_pod_container_info{cluster=~\"$cluster\",namespace=~\"$namespace$\"}) by (container,image,pod)",
+              "expr": "sum(kube_pod_container_info{cluster=~\"$cluster\", namespace=~\"$namespace\", pod=~\"$pod\"}) by (container, image, pod)",
               "format": "table",
               "hide": false,
               "instant": true,
@@ -3430,7 +3136,7 @@
               "step": 1,
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_THANOS_- PAAS}"
+                "uid": "${Prometheus}"
               }
             }
           ],
@@ -3446,7 +3152,7 @@
       "collapsed": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "AxODBm_Gk"
+        "uid": "${Prometheus}"
       },
       "gridPos": {
         "h": 1,
@@ -3463,7 +3169,7 @@
       "columns": [],
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_THANOS_- PAAS}"
+        "uid": "${Prometheus}"
       },
       "fontSize": "100%",
       "gridPos": {
@@ -3540,10 +3246,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS_- AWS}"
+            "uid": "${Prometheus}"
           },
           "editorMode": "code",
-          "expr": "count(kube_pod_info{cluster=~\"$cluster\",namespace=\"$namespace\",node=~\"$node\"}) by (node,pod,pod_ip,host_ip)",
+          "expr": "count(kube_pod_info{cluster=~\"$cluster\", namespace=~\"$namespace\", node=~\"$node\"}) by (cluster, node, pod, pod_ip, host_ip)",
           "format": "table",
           "hide": false,
           "instant": true,
@@ -3567,242 +3273,114 @@
   "templating": {
     "list": [
       {
-        "current": {
-          "selected": false,
-          "text": "paas",
-          "value": "paas"
-        },
-        "hide": 0,
-        "includeAll": false,
-        "multi": false,
-        "name": "provider",
-        "options": [
-          {
-            "selected": true,
-            "text": "paas",
-            "value": "paas"
-          },
-          {
-            "selected": false,
-            "text": "azure",
-            "value": "azure"
-          },
-          {
-            "selected": false,
-            "text": "aws",
-            "value": "aws"
-          }
-        ],
-        "query": "paas, azure, aws",
-        "queryValue": "",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "current": {
-          "selected": false,
-          "text": "thanos - paas",
-          "value": "thanos - paas"
-        },
-        "hide": 2,
-        "includeAll": false,
-        "multi": false,
-        "name": "datasource_thanos",
-        "options": [],
-        "query": "prometheus",
-        "queryValue": "",
-        "refresh": 1,
-        "regex": "/thanos - ($provider)$/",
-        "skipUrlSync": false,
-        "type": "datasource"
-      },
-      {
-        "current": {
-          "selected": false,
-          "text": "elasticsearch - ingress - paas",
-          "value": "elasticsearch - ingress - paas"
-        },
-        "hide": 2,
-        "includeAll": false,
-        "multi": false,
-        "name": "datasource_elasticsearch",
-        "options": [],
-        "query": "elasticsearch",
-        "queryValue": "",
-        "refresh": 1,
-        "regex": "/elasticsearch - ingress - ($provider)$/",
-        "skipUrlSync": false,
-        "type": "datasource"
-      },
-      {
-        "current": {},
-        "datasource": {
-          "type": "prometheus",
-          "uid": "${DS_THANOS_- PAAS}"
-        },
-        "definition": "query_result(group(kube_node_labels) by (cluster))",
-        "hide": 0,
-        "includeAll": true,
-        "multi": true,
         "name": "cluster",
-        "options": [],
-        "query": {
-          "query": "query_result(group(kube_node_labels) by (cluster))",
-          "refId": "PrometheusVariableQueryEditor-VariableQuery"
-        },
-        "refresh": 1,
-        "regex": "/cluster=\"(.*)\"/",
-        "skipUrlSync": false,
-        "sort": 1,
-        "tagValuesQuery": "",
-        "tagsQuery": "",
         "type": "query",
-        "useTags": false
-      },
-      {
-        "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "${DS_THANOS_- PAAS}"
+          "uid": "${Prometheus}"
         },
-        "definition": "query_result(group(kube_namespace_labels{cluster=~\"$cluster\"}) by (namespace))",
+        "definition": "label_values(kube_node_labels, cluster)",
+        "query": {
+          "query": "label_values(kube_node_labels, cluster)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "includeAll": true,
+        "multi": true,
+        "refresh": 1,
+        "sort": 1,
         "hide": 0,
-        "includeAll": false,
-        "label": "",
-        "multi": false,
+        "regex": "",
+        "skipUrlSync": false,
+        "options": [],
+        "current": {}
+      },
+      {
         "name": "namespace",
-        "options": [],
-        "query": {
-          "query": "query_result(group(kube_namespace_labels{cluster=~\"$cluster\"}) by (namespace))",
-          "refId": "PrometheusVariableQueryEditor-VariableQuery"
-        },
-        "refresh": 1,
-        "regex": "/.*=\"(.*)\".*/",
-        "skipUrlSync": false,
-        "sort": 1,
-        "type": "query"
-      },
-      {
-        "current": {},
+        "type": "query",
         "datasource": {
           "type": "prometheus",
-          "uid": "${DS_THANOS_- PAAS}"
+          "uid": "${Prometheus}"
         },
-        "definition": "query_result(group(kube_pod_info{cluster=~\"$cluster\", namespace=~\"$namespace\"}) by (node))",
-        "description": "",
-        "hide": 0,
-        "includeAll": true,
-        "multi": true,
-        "name": "node",
-        "options": [],
+        "definition": "label_values(kube_pod_info{cluster=~\"$cluster\"}, namespace)",
         "query": {
-          "query": "query_result(group(kube_pod_info{cluster=~\"$cluster\", namespace=~\"$namespace\"}) by (node))",
+          "query": "label_values(kube_pod_info{cluster=~\"$cluster\"}, namespace)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
-        "refresh": 1,
-        "regex": "/{.*=\"(.*)\".*/",
-        "skipUrlSync": false,
-        "sort": 1,
-        "type": "query"
-      },
-      {
-        "current": {},
-        "datasource": {
-          "type": "prometheus",
-          "uid": "${DS_THANOS_- PAAS}"
-        },
-        "definition": "query_result(group(kube_pod_info{cluster=~\"$cluster\", namespace=~\"$namespace\", node=~\"$node\"}) by (created_by_kind))",
-        "hide": 0,
-        "includeAll": true,
+        "includeAll": false,
         "multi": false,
-        "name": "kind",
-        "options": [],
-        "query": {
-          "query": "query_result(group(kube_pod_info{cluster=~\"$cluster\", namespace=~\"$namespace\", node=~\"$node\"}) by (created_by_kind))",
-          "refId": "PrometheusVariableQueryEditor-VariableQuery"
-        },
         "refresh": 1,
-        "regex": "/{.*=\"(.*)\".*/",
-        "skipUrlSync": false,
         "sort": 1,
-        "type": "query"
+        "hide": 0,
+        "regex": "",
+        "skipUrlSync": false,
+        "options": [],
+        "current": {}
       },
       {
-        "current": {},
+        "name": "node",
+        "type": "query",
         "datasource": {
           "type": "prometheus",
-          "uid": "${DS_THANOS_- PAAS}"
+          "uid": "${Prometheus}"
         },
-        "definition": "query_result(group(kube_pod_info{cluster=~\"$cluster\", namespace=~\"$namespace\", node=~\"$node\", created_by_kind=~\"$kind\"}) by (created_by_name))",
-        "hide": 0,
-        "includeAll": true,
-        "multi": true,
-        "name": "name",
-        "options": [],
+        "definition": "label_values(kube_pod_info{cluster=~\"$cluster\", namespace=~\"$namespace\"}, node)",
         "query": {
-          "query": "query_result(group(kube_pod_info{cluster=~\"$cluster\", namespace=~\"$namespace\", node=~\"$node\", created_by_kind=~\"$kind\"}) by (created_by_name))",
+          "query": "label_values(kube_pod_info{cluster=~\"$cluster\", namespace=~\"$namespace\"}, node)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
-        "refresh": 1,
-        "regex": "/{.*=\"(.*)\".*/",
-        "skipUrlSync": false,
-        "sort": 1,
-        "type": "query"
-      },
-      {
-        "current": {},
-        "datasource": {
-          "type": "prometheus",
-          "uid": "${DS_THANOS_- PAAS}"
-        },
-        "definition": "query_result(group(kube_pod_info{cluster=~\"$cluster\", namespace=~\"$namespace\", node=~\"$node\", created_by_kind=~\"$kind\", created_by_name=~\"$name\"}) by (pod))",
-        "hide": 0,
         "includeAll": true,
         "multi": true,
+        "refresh": 1,
+        "sort": 1,
+        "hide": 0,
+        "regex": "",
+        "skipUrlSync": false,
+        "options": [],
+        "current": {}
+      },
+      {
         "name": "pod",
-        "options": [],
-        "query": {
-          "query": "query_result(group(kube_pod_info{cluster=~\"$cluster\", namespace=~\"$namespace\", node=~\"$node\", created_by_kind=~\"$kind\", created_by_name=~\"$name\"}) by (pod))",
-          "refId": "PrometheusVariableQueryEditor-VariableQuery"
-        },
-        "refresh": 1,
-        "regex": "/{.*=\"(.*)\".*/",
-        "skipUrlSync": false,
-        "sort": 1,
-        "type": "query"
-      },
-      {
-        "current": {},
+        "type": "query",
         "datasource": {
           "type": "prometheus",
-          "uid": "${DS_THANOS_- PAAS}"
+          "uid": "${Prometheus}"
         },
-        "definition": "query_result(group(container_oom_events_total{cluster=~\"$cluster\", namespace=~\"$namespace\", node=~\"$node\", pod=~\"$pod\"}) by (container))",
-        "hide": 0,
+        "definition": "label_values(kube_pod_info{cluster=~\"$cluster\", namespace=~\"$namespace\", node=~\"$node\"}, pod)",
+        "query": {
+          "query": "label_values(kube_pod_info{cluster=~\"$cluster\", namespace=~\"$namespace\", node=~\"$node\"}, pod)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
         "includeAll": true,
         "multi": true,
-        "name": "container",
-        "options": [],
-        "query": {
-          "query": "query_result(group(container_oom_events_total{cluster=~\"$cluster\", namespace=~\"$namespace\", node=~\"$node\", pod=~\"$pod\"}) by (container))",
-          "refId": "PrometheusVariableQueryEditor-VariableQuery"
-        },
         "refresh": 1,
-        "regex": "/{.*=\"(.*)\".*/",
+        "sort": 1,
+        "hide": 0,
+        "regex": "",
         "skipUrlSync": false,
-        "sort": 0,
-        "type": "query"
+        "options": [],
+        "current": {}
       },
       {
+        "name": "container",
+        "type": "query",
         "datasource": {
           "type": "prometheus",
-          "uid": "${datasource_thanos}"
+          "uid": "${Prometheus}"
         },
-        "filters": [],
+        "definition": "label_values(kube_pod_container_info{cluster=~\"$cluster\", namespace=~\"$namespace\", pod=~\"$pod\"}, container)",
+        "query": {
+          "query": "label_values(kube_pod_container_info{cluster=~\"$cluster\", namespace=~\"$namespace\", pod=~\"$pod\"}, container)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "includeAll": true,
+        "multi": true,
+        "refresh": 1,
+        "sort": 1,
         "hide": 0,
-        "name": "Filters",
+        "regex": "",
         "skipUrlSync": false,
-        "type": "adhoc"
+        "options": [],
+        "current": {}
       }
     ]
   },

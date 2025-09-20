@@ -5,6 +5,19 @@ from __future__ import annotations
 from prometheus_client import CollectorRegistry, Counter, Gauge, Histogram
 
 
+KSM_BASE_NODE_LABELS = (
+    "cluster",
+    "namespace",
+    "service",
+    "pod",
+    "container",
+    "job",
+    "endpoint",
+    "prometheus",
+    "node",
+)
+
+
 class MetricSet:
     """Wrapper object holding Prometheus metric instances."""
 
@@ -139,19 +152,31 @@ class MetricSet:
         self.kube_node_status_condition = Gauge(
             "kube_node_status_condition",
             "The condition of a Kubernetes node as reported by the API server.",
-            labelnames=("cluster", "node", "condition", "status"),
+            labelnames=KSM_BASE_NODE_LABELS + ("condition", "status"),
             registry=reg,
         )
         self.kube_node_status_capacity_cpu_cores = Gauge(
             "kube_node_status_capacity_cpu_cores",
             "Node CPU core capacity from the Kubernetes API.",
-            labelnames=("cluster", "node"),
+            labelnames=KSM_BASE_NODE_LABELS,
             registry=reg,
         )
         self.kube_node_status_capacity_memory_bytes = Gauge(
             "kube_node_status_capacity_memory_bytes",
             "Node memory capacity from the Kubernetes API.",
-            labelnames=("cluster", "node"),
+            labelnames=KSM_BASE_NODE_LABELS,
+            registry=reg,
+        )
+        self.kube_node_status_allocatable_cpu_cores = Gauge(
+            "kube_node_status_allocatable_cpu_cores",
+            "Node CPU allocatable cores from the Kubernetes API.",
+            labelnames=KSM_BASE_NODE_LABELS,
+            registry=reg,
+        )
+        self.kube_node_status_allocatable_memory_bytes = Gauge(
+            "kube_node_status_allocatable_memory_bytes",
+            "Node allocatable memory from the Kubernetes API.",
+            labelnames=KSM_BASE_NODE_LABELS,
             registry=reg,
         )
         self.kube_namespace_status_phase = Gauge(

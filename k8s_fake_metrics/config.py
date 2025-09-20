@@ -6,7 +6,13 @@ import os
 from dataclasses import dataclass
 from typing import Optional
 
-from dotenv import load_dotenv
+try:
+    from dotenv import load_dotenv
+except ModuleNotFoundError:  # pragma: no cover - optional dependency
+    def load_dotenv(*_args, **_kwargs):  # type: ignore[override]
+        """Fallback stub when python-dotenv is not installed."""
+
+        return False
 
 
 @dataclass(slots=True)
