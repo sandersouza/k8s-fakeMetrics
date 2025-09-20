@@ -10,7 +10,7 @@ Gerador de métricas sintéticas de Kubernetes inspirado no projeto [Grafana fak
 - Métricas do control plane (apiserver, scheduler, controller-manager) incluindo histogramas de latência.
 - Métricas de ingress controllers (NGINX e opcionalmente Traefik) com contadores e histogramas.
 - Exportação via endpoint HTTP `/metrics` compatível com Prometheus.
-- Catálogo dinâmico de métricas carregado de `metric-label.json`, permitindo simular todas as séries usadas em dashboards reais.
+- Catálogo dinâmico de métricas carregado de `dynamicMetrics.json`, permitindo simular todas as séries usadas em dashboards reais.
 - Fator *chaos* configurado para gerar anomalias esporádicas de CPU, memória, tráfego de rede, disco e conexões.
 
 ## Requisitos
@@ -68,6 +68,50 @@ Por padrão o servidor ficará disponível em `http://localhost:8000/metrics`. P
 python -m k8s_fake_metrics --once
 ```
 
+## Execução via Docker
+
+Para rodar o serviço em um container (ideal para deploy em Pods Kubernetes):
+
+```bash
+docker build -t k8s-fake-metrics .
+# Ajuste a porta conforme METRICS_PORT (o `.env` de exemplo usa 5500).
+docker run --rm -p 5500:5500 --env-file .env k8s-fake-metrics
+```
+
+Publicando a imagem em um registry, é possível implantar em Kubernetes com um manifesto similar:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8s-fake-metrics
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: k8s-fake-metrics
+  template:
+    metadata:
+      labels:
+        app: k8s-fake-metrics
+    spec:
+      containers:
+        - name: k8s-fake-metrics
+          image: <registry>/k8s-fake-metrics:latest
+          ports:
+            - containerPort: 5500
+          envFrom:
+            - configMapRef:
+                name: k8s-fake-metrics-env
+```
+
+Crie um `ConfigMap` com as variáveis do `.env` (ou defina-as diretamente) para ajustar porta, número de clusters simulados e intervalo de atualização.
+
+
+## Catálogo dynamicMetrics.json
+
+O arquivo `dynamicMetrics.json` lista as métricas adicionais que serão geradas dinamicamente. Cada entrada corresponde ao nome de uma métrica Prometheus e é carregada pelo `DynamicMetricRegistry` para produzir séries sintéticas além das métricas base pré-programadas. Ajuste esse catálogo para adicionar, remover ou limitar métricas específicas conforme os dashboards que deseja exercitar.
+
 ## Métricas geradas
 
 A lista a seguir descreve as principais famílias de métricas disponíveis:
@@ -120,7 +164,7 @@ A combinação dessas métricas cobre dashboards de infraestrutura (CPU, memóri
 
 - Execute `python -m k8s_fake_metrics --once` para validar rapidamente a geração de métricas.
 - Para garantir que o código está sintaticamente correto utilize `python -m compileall k8s_fake_metrics`.
-- Ajuste o arquivo `metric-label.json` para incluir novas métricas no catálogo dinâmico ou remover séries específicas.
+- Ajuste o arquivo `dynamicMetrics.json` para incluir novas métricas no catálogo dinâmico ou remover séries específicas.
 - Utilize as variáveis de ambiente padrão em conjunto com o fator *chaos* embutido para observar como dashboards reagem a picos súbitos.
 
 Contribuições são bem-vindas!

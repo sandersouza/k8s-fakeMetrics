@@ -1,6 +1,6 @@
 """Dynamic Prometheus metrics generated from a JSON catalog.
 
-This module loads the list of metric names from ``metric-label.json`` and
+This module loads the list of metric names from ``dynamicMetrics.json`` and
 creates lightweight Prometheus metrics for each one. The metrics are grouped
 by heuristics (counter/gauge, unit, category) so that every update produces
 values that resemble the semantics of the original metric.  A ``ChaosEngine``
@@ -468,4 +468,3 @@ __all__ = [
     "ChaosEngine",
     "DynamicMetricRegistry",
 ]
-

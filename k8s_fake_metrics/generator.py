@@ -135,7 +135,7 @@ class FakeMetricsGenerator:
         self.clusters: List[ClusterState] = []
         self.chaos = ChaosEngine(self.random)
         self._create_environment()
-        metric_file = Path(__file__).resolve().parent.parent / "metric-label.json"
+        metric_file = Path(__file__).resolve().parent.parent / "dynamicMetrics.json"
         existing_metric_names = self._collect_registered_metric_names()
         label_provider = self._build_label_provider()
         self.dynamic_metrics = DynamicMetricRegistry(
