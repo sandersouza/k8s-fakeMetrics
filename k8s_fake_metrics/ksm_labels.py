@@ -6,7 +6,7 @@ import csv
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Sequence, Tuple
+from typing import Callable, Dict, Iterable, List, Optional, Sequence, Tuple
 
 from .entities import (
     CertificateSigningRequestState,
@@ -70,24 +70,7 @@ class KubeStateMetricLabelProvider:
         base_path = Path(__file__).resolve().parent.parent
         mapping_file = base_path / "ksm.csv"
         self.metric_groups = self._load_metric_groups(mapping_file)
-        self.metadata: Dict[str, MetricLabelMetadata] = {}
-        self._build_metadata()
-
-    def _load_metric_groups(self, path: Path) -> Dict[str, str]:
-        if not path.exists():
-            return {}
-        mapping: Dict[str, str] = {}
-        with path.open("r", encoding="utf-8") as handle:
-            reader = csv.DictReader(handle)
-            for row in reader:
-                metric = row.get("metric")
-                group = row.get("resource_group")
-                if metric and group:
-                    mapping[metric.strip()] = group.strip()
-        return mapping
-
-    def _build_metadata(self) -> None:
-        builders = {
+        self._builders: Dict[str, Callable[[str], Optional[MetricLabelMetadata]]] = {
             "node": self._build_node_metadata,
             "namespace": self._build_namespace_metadata,
             "deployment": self._build_deployment_metadata,
@@ -119,22 +102,75 @@ class KubeStateMetricLabelProvider:
             "ingress": self._build_ingress_metadata,
             "replicaset": self._build_replicaset_metadata,
             "replicationcontroller": self._build_replicationcontroller_metadata,
-            "persistentvolumeclaim": self._build_pvc_metadata,
-            "persistentvolume": self._build_pv_metadata,
-            "poddisruptionbudget": self._build_pdb_metadata,
             "running": self._build_running_metadata,
         }
-        # ensure builders exist for each group referenced in mapping
-        for metric, group in self.metric_groups.items():
-            builder = builders.get(group)
-            if builder is None:
-                continue
-            metadata = builder(metric)
-            if metadata:
-                self.metadata[metric] = metadata
+        self._group_aliases: Dict[str, str] = {
+            "endpoints": "endpoint",
+            "services": "service",
+            "nodes": "node",
+            "pods": "pod",
+            "deployments": "deployment",
+        }
+        self.metadata: Dict[str, MetricLabelMetadata] = {}
+        self._build_metadata()
+
+    def _load_metric_groups(self, path: Path) -> Dict[str, str]:
+        if not path.exists():
+            return {}
+        mapping: Dict[str, str] = {}
+        with path.open("r", encoding="utf-8") as handle:
+            reader = csv.DictReader(handle)
+            for row in reader:
+                metric = row.get("metric")
+                group = row.get("resource_group")
+                if metric and group:
+                    mapping[metric.strip()] = group.strip()
+        return mapping
+
+    def _build_metadata(self) -> None:
+        for metric in self.metric_groups:
+            self._ensure_metadata(metric)
 
     def metadata_for(self, metric_name: str) -> Optional[MetricLabelMetadata]:
-        return self.metadata.get(metric_name)
+        metadata = self.metadata.get(metric_name)
+        if metadata is None:
+            self._ensure_metadata(metric_name)
+            metadata = self.metadata.get(metric_name)
+        return metadata
+
+    def _ensure_metadata(self, metric: str) -> None:
+        if not metric or metric in self.metadata:
+            return
+        group = self.metric_groups.get(metric)
+        if group is None:
+            group = self._infer_metric_group(metric)
+            if group:
+                self.metric_groups.setdefault(metric, group)
+        if not group:
+            return
+        builder = self._builders.get(group)
+        if builder is None:
+            return
+        metadata = builder(metric)
+        if metadata:
+            self.metadata[metric] = metadata
+
+    def _infer_metric_group(self, metric: str) -> Optional[str]:
+        if metric.startswith("apiserver_"):
+            return "apiserver"
+        if metric.startswith("rest_client_") or metric.startswith("restclient_"):
+            return "state"
+        if metric.startswith("workqueue_"):
+            return "state"
+        if metric.startswith("kube_"):
+            remainder = metric[5:]
+            if remainder.startswith("state_"):
+                return "state"
+            candidate = remainder.split("_", 1)[0]
+            candidate = self._group_aliases.get(candidate, candidate)
+            if candidate in self._builders:
+                return candidate
+        return None
 
     # ------------------------------------------------------------------
     # Helper utilities
